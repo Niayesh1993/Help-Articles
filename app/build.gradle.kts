@@ -40,6 +40,10 @@ android {
 dependencies {
     implementation(project(":shared"))
 
+    // Required for XML theme support
+    implementation(libs.appcompat)
+    implementation(libs.material)
+
     // Compose
     val composeBom = platform(libs.compose.bom)
     implementation(composeBom)
