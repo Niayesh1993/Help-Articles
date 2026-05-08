@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
@@ -20,6 +21,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zozi.helparticlesapp.ui.components.ArticleCard
 import com.zozi.helparticlesapp.ui.components.ErrorView
+import com.example.helparticles.R
+import com.zozi.helparticlesapp.ui.components.EmptyContent
+import com.zozi.helparticlesapp.ui.components.LoadingContent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,15 +33,16 @@ fun ArticleListScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val refreshContentDesc = stringResource(R.string.article_list_refresh_content_desc)
 
     Scaffold(
         topBar = {
             LargeTopAppBar(
-                title = { Text("Help Articles") },
+                title = { Text(stringResource(R.string.article_list_title)) },
                 actions = {
                     IconButton(
                         onClick = { viewModel.loadArticles(forceRefresh = true) },
-                        modifier = Modifier.semantics { contentDescription = "Refresh articles" }
+                        modifier = Modifier.semantics { contentDescription = refreshContentDesc }
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Refresh,
@@ -58,6 +63,7 @@ fun ArticleListScreen(
                         fadeOut()
             },
             label = "list-state-transition",
+            contentKey = { state -> state::class },
             modifier = Modifier.padding(paddingValues)
         ) { state ->
             when (state) {
@@ -85,14 +91,14 @@ private fun SuccessContent(
     onQueryChanged: (String) -> Unit
 ) {
     Column {
-        // Offline banner
+
         AnimatedVisibility(visible = state.isFromCache) {
             Surface(
                 color = MaterialTheme.colorScheme.surfaceVariant,
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Showing cached content — you appear to be offline",
+                    text = stringResource(R.string.article_list_offline_banner),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center,
@@ -101,7 +107,6 @@ private fun SuccessContent(
             }
         }
 
-        // Search bar
         SearchBar(
             query = state.query,
             onQueryChanged = onQueryChanged,
@@ -110,7 +115,6 @@ private fun SuccessContent(
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        // List or empty-filter state
         if (state.filtered.isEmpty()) {
             Box(
                 contentAlignment = Alignment.Center,
@@ -119,7 +123,7 @@ private fun SuccessContent(
                     .padding(32.dp)
             ) {
                 Text(
-                    text = "No articles match \"${state.query}\"",
+                    text = stringResource(R.string.article_list_no_match, state.query),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     textAlign = TextAlign.Center
@@ -153,7 +157,7 @@ private fun SearchBar(
     OutlinedTextField(
         value = query,
         onValueChange = onQueryChanged,
-        placeholder = { Text("Search articles...") },
+        placeholder = { Text(stringResource(R.string.article_list_search_placeholder)) },
         leadingIcon = {
             Icon(imageVector = Icons.Default.Search, contentDescription = null)
         },
@@ -163,31 +167,5 @@ private fun SearchBar(
     )
 }
 
-@Composable
-private fun LoadingContent() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.fillMaxSize()
-    ) {
-        CircularProgressIndicator(
-            modifier = Modifier.semantics { contentDescription = "Loading articles" }
-        )
-    }
-}
 
-@Composable
-private fun EmptyContent() {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(32.dp)
-    ) {
-        Text(
-            text = "No articles available",
-            style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
-    }
-}
+

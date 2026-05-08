@@ -5,11 +5,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
+import com.example.helparticles.R
 import com.zozi.shared.model.Article
 import com.zozi.helparticlesapp.util.DateFormatter
 
@@ -21,6 +23,12 @@ fun ArticleCard(
     modifier: Modifier = Modifier
 ) {
     val formattedDate = DateFormatter.formatDate(article.updatedAt)
+    val cardContentDesc = stringResource(
+        R.string.article_card_content_description,
+        article.title,
+        article.category,
+        formattedDate
+    )
 
     Card(
         onClick = onClick,
@@ -28,7 +36,7 @@ fun ArticleCard(
             .fillMaxWidth()
             .animateContentSize()
             .semantics {
-                contentDescription = "Article: ${article.title}. Category: ${article.category}. Updated $formattedDate"
+                contentDescription = cardContentDesc
             },
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -70,7 +78,7 @@ fun ArticleCard(
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Updated $formattedDate",
+                text = stringResource(R.string.article_updated_prefix, formattedDate),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.outline
             )
@@ -85,10 +93,10 @@ fun ArticleCardPreview() {
     ArticleCard(
         article = Article(
             id = "1",
-            title = "Getting Started with Kotlin",
-            summary = "Learn the basics of Kotlin programming language and how to use it for Android development.",
+            title = stringResource(R.string.article_preview_title),
+            summary = stringResource(R.string.article_preview_summary),
             updatedAt = System.currentTimeMillis(),
-            category = "Programming"
+            category = stringResource(R.string.article_preview_category)
         ),
         onClick = {}
     )

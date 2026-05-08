@@ -76,7 +76,7 @@ private fun BackendErrorContent(
             )
             Spacer(Modifier.height(4.dp))
             Text(
-                text = "Code: ${error.errorCode}",
+                text = stringResource(R.string.error_backend_code, error.errorCode),
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -143,8 +143,8 @@ fun BackendErrorViewPreview() {
     ErrorView(
         error = AppError.BackendError(
             errorCode = "500",
-            errorTitle = "Server Error",
-            errorMessage = "The server encountered an unexpected error. Please try again later."
+            errorTitle = stringResource(R.string.error_backend_preview_title),
+            errorMessage = stringResource(R.string.error_backend_preview_message)
         ),
         onRetry = {}
     )
@@ -155,7 +155,7 @@ fun BackendErrorViewPreview() {
 fun ConnectivityErrorViewPreview() {
     ErrorView(
         error = AppError.ConnectivityError(
-            message = "Unable to connect to the server. Please check your internet connection."
+            message = stringResource(R.string.error_connectivity_preview_message)
         ),
         onRetry = {}
     )

@@ -3,23 +3,16 @@ package com.zozi.helparticlesapp.ui.detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zozi.helparticlesapp.data.model.AppError
+import com.zozi.helparticlesapp.data.model.toAppError
 import com.zozi.helparticlesapp.data.repository.ArticleRepository
-import com.zozi.helparticlesapp.data.repository.BackendException
-import com.zozi.helparticlesapp.data.repository.ConnectivityException
-import com.zozi.shared.model.ArticleDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed interface ArticleDetailUiState {
-    data object Loading : ArticleDetailUiState
-    data class Success(val detail: ArticleDetail) : ArticleDetailUiState
-    data class Error(val appError: AppError) : ArticleDetailUiState
-}
 
 @HiltViewModel
+@OptIn(ExperimentalCoroutinesApi::class)
 class ArticleDetailViewModel @Inject constructor(
     private val repository: ArticleRepository,
     savedStateHandle: SavedStateHandle
@@ -27,27 +20,32 @@ class ArticleDetailViewModel @Inject constructor(
 
     private val articleId: String = checkNotNull(savedStateHandle["articleId"])
 
-    private val _uiState = MutableStateFlow<ArticleDetailUiState>(ArticleDetailUiState.Loading)
-    val uiState: StateFlow<ArticleDetailUiState> = _uiState.asStateFlow()
+    private val loadRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
 
-    init { loadDetail() }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val uiState: StateFlow<ArticleDetailUiState> = loadRequests
+        .onStart { emit(false) }
+        .flatMapLatest { forceRefresh ->
+            flow {
+                emit(ArticleDetailUiState.Loading)
+                val result = repository.getArticleDetail(articleId, forceRefresh)
+                emit(
+                    result.fold(
+                        onSuccess = { detail -> ArticleDetailUiState.Success(detail) },
+                        onFailure = { error -> ArticleDetailUiState.Error(error.toAppError()) }
+                    )
+                )
+            }
+        }
+        // Using WhileSubscribed means the request starts when the UI collects.
+        // This avoids work when the screen isn't visible.
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
+            initialValue = ArticleDetailUiState.Loading
+        )
 
     fun loadDetail(forceRefresh: Boolean = false) {
-        viewModelScope.launch {
-            _uiState.value = ArticleDetailUiState.Loading
-            repository.getArticleDetail(articleId, forceRefresh)
-                .onSuccess { detail ->
-                    _uiState.value = ArticleDetailUiState.Success(detail)
-                }
-                .onFailure { error ->
-                    _uiState.value = ArticleDetailUiState.Error(error.toAppError())
-                }
-        }
-    }
-
-    private fun Throwable.toAppError(): AppError = when (this) {
-        is BackendException -> AppError.BackendError(errorCode, errorTitle, errorMessage)
-        is ConnectivityException -> AppError.ConnectivityError(message ?: "Connection failed")
-        else -> AppError.ConnectivityError(message ?: "Unexpected error")
+        loadRequests.tryEmit(forceRefresh)
     }
 }

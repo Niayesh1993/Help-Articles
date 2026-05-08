@@ -12,6 +12,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
@@ -20,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.zozi.helparticlesapp.ui.components.ErrorView
 import com.zozi.shared.model.ArticleDetail
+import com.example.helparticles.R
 import io.noties.markwon.Markwon
 import java.text.SimpleDateFormat
 import java.util.*
@@ -31,6 +33,8 @@ fun ArticleDetailScreen(
     viewModel: ArticleDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val backContentDesc = stringResource(R.string.article_detail_navigate_back)
+    val loadingContentDesc = stringResource(R.string.article_detail_loading_content_desc)
 
     Scaffold(
         topBar = {
@@ -47,7 +51,7 @@ fun ArticleDetailScreen(
                     IconButton(
                         onClick = onBack,
                         modifier = Modifier.semantics {
-                            contentDescription = "Navigate back"
+                            contentDescription = backContentDesc
                         }
                     ) {
                         Icon(
@@ -74,7 +78,7 @@ fun ArticleDetailScreen(
                     ) {
                         CircularProgressIndicator(
                             modifier = Modifier.semantics {
-                                contentDescription = "Loading article"
+                                contentDescription = loadingContentDesc
                             }
                         )
                     }
@@ -108,7 +112,6 @@ private fun DetailContent(
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
-        // Category chip
         SuggestionChip(
             onClick = {},
             label = { Text(detail.category, style = MaterialTheme.typography.labelSmall) }
@@ -125,7 +128,7 @@ private fun DetailContent(
         Spacer(Modifier.height(4.dp))
 
         Text(
-            text = "Updated $formattedDate",
+            text = stringResource(R.string.article_updated_prefix, formattedDate),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.outline
         )
@@ -136,11 +139,10 @@ private fun DetailContent(
 
         Spacer(Modifier.height(16.dp))
 
-        // Markdown content rendered via Markwon into a native TextView
         AndroidView(
             factory = { ctx ->
                 TextView(ctx).apply {
-                    setTextColor(android.graphics.Color.TRANSPARENT) // overridden by Markwon
+                    setTextColor(android.graphics.Color.TRANSPARENT)
                     textSize = 15f
                 }
             },

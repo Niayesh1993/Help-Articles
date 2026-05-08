@@ -110,9 +110,7 @@ class BackendException(
 
 // Extension to read cache regardless of TTL (for offline fallback)
 fun ArticleCache.getArticleListStale(): List<Article>? =
-// Access without TTL by calling internal storage — simplest pragmatic approach:
-// re-store with a far-future timestamp, read, then restore. Instead we just
-    // expose a dedicated method in the cache for clarity.
-    null  // Replaced by getArticleListIgnoringTtl below
+    getArticleListIgnoringTtl()
 
-fun ArticleCache.getArticleDetailStale(id: String): ArticleDetail? = null
+fun ArticleCache.getArticleDetailStale(id: String): ArticleDetail? =
+    getArticleDetailIgnoringTtl(id)
