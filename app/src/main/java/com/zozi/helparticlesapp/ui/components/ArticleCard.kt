@@ -9,9 +9,9 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
 import com.zozi.shared.model.Article
-import java.text.SimpleDateFormat
-import java.util.*
+import com.zozi.helparticlesapp.util.DateFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -20,10 +20,7 @@ fun ArticleCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val formattedDate = remember(article.updatedAt) {
-        SimpleDateFormat("MMM d, yyyy", Locale.getDefault())
-            .format(Date(article.updatedAt))
-    }
+    val formattedDate = DateFormatter.formatDate(article.updatedAt)
 
     Card(
         onClick = onClick,
@@ -39,7 +36,6 @@ fun ArticleCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Category chip
             SuggestionChip(
                 onClick = {},
                 label = {
@@ -53,7 +49,6 @@ fun ArticleCard(
 
             Spacer(Modifier.height(8.dp))
 
-            // Title
             Text(
                 text = article.title,
                 style = MaterialTheme.typography.titleMedium,
@@ -64,7 +59,6 @@ fun ArticleCard(
 
             Spacer(Modifier.height(4.dp))
 
-            // Summary
             Text(
                 text = article.summary,
                 style = MaterialTheme.typography.bodyMedium,
@@ -75,7 +69,6 @@ fun ArticleCard(
 
             Spacer(Modifier.height(8.dp))
 
-            // Date
             Text(
                 text = "Updated $formattedDate",
                 style = MaterialTheme.typography.labelSmall,
@@ -85,8 +78,19 @@ fun ArticleCard(
     }
 }
 
-// Extension so the call site compiles without importing java.util directly
-private fun remember(key: Any, calculation: () -> String): String {
-    // Delegating to Compose's remember is done at call site; this is a plain utility
-    return calculation()
+
+@Preview(showBackground = true)
+@Composable
+fun ArticleCardPreview() {
+    ArticleCard(
+        article = Article(
+            id = "1",
+            title = "Getting Started with Kotlin",
+            summary = "Learn the basics of Kotlin programming language and how to use it for Android development.",
+            updatedAt = System.currentTimeMillis(),
+            category = "Programming"
+        ),
+        onClick = {}
+    )
 }
+

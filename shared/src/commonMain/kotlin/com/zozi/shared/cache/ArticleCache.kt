@@ -5,7 +5,6 @@ import com.zozi.shared.model.ArticleDetail
 import com.zozi.shared.util.TimeProvider
 import com.zozi.shared.util.SystemTimeProvider
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 
 class ArticleCache(

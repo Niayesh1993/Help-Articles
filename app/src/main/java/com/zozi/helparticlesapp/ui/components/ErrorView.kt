@@ -10,20 +10,14 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.zozi.helparticlesapp.data.model.AppError
+import com.example.helparticles.R
 
-/**
- * Unified error composable that renders differently for each [AppError] type:
- *
- * - [AppError.BackendError]: uses the error-container color scheme,
- *   surfaces errorCode, errorTitle, errorMessage verbatim from the server.
- *
- * - [AppError.ConnectivityError]: uses a neutral/surface tone with a
- *   cloud-off icon; message is human-friendly, not raw exception text.
- */
 @Composable
 fun ErrorView(
     error: AppError,
@@ -94,7 +88,7 @@ private fun BackendErrorContent(
                     contentColor = MaterialTheme.colorScheme.onErrorContainer
                 )
             ) {
-                Text("Try Again")
+                Text(stringResource(R.string.error_retry_button))
             }
         }
     }
@@ -102,6 +96,7 @@ private fun BackendErrorContent(
 
 @Composable
 private fun ConnectivityErrorContent(
+    @Suppress("UNUSED_PARAMETER")
     error: AppError.ConnectivityError,
     onRetry: () -> Unit
 ) {
@@ -121,13 +116,13 @@ private fun ConnectivityErrorContent(
         )
         Spacer(Modifier.height(16.dp))
         Text(
-            text = "No Connection",
+            text = stringResource(R.string.error_connectivity_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(8.dp))
         Text(
-            text = "Check your internet connection and try again.",
+            text = stringResource(R.string.error_connectivity_message),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center
@@ -137,7 +132,31 @@ private fun ConnectivityErrorContent(
             onClick = onRetry,
             modifier = Modifier.defaultMinSize(minWidth = 120.dp, minHeight = 48.dp)
         ) {
-            Text("Retry")
+            Text(stringResource(R.string.error_connectivity_retry_button))
         }
     }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun BackendErrorViewPreview() {
+    ErrorView(
+        error = AppError.BackendError(
+            errorCode = "500",
+            errorTitle = "Server Error",
+            errorMessage = "The server encountered an unexpected error. Please try again later."
+        ),
+        onRetry = {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ConnectivityErrorViewPreview() {
+    ErrorView(
+        error = AppError.ConnectivityError(
+            message = "Unable to connect to the server. Please check your internet connection."
+        ),
+        onRetry = {}
+    )
 }

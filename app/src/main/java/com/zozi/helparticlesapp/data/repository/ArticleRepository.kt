@@ -1,9 +1,5 @@
 package com.zozi.helparticlesapp.data.repository
 
-
-
-import com.zozi.helparticlesapp.data.model.ArticleDetailDto
-import com.zozi.helparticlesapp.data.model.ArticleDto
 import com.zozi.helparticlesapp.data.remote.ArticleApi
 import com.zozi.shared.cache.ArticleCache
 import com.zozi.shared.model.Article
@@ -12,24 +8,11 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Single source of truth for articles.
- *
- * Fetch strategy:
- *   1. If cache has fresh data, return it immediately.
- *   2. Otherwise attempt network fetch.
- *   3. On success: update cache, return fresh data.
- *   4. On connectivity error: fall back to stale cache if available.
- *   5. On backend error: surface it directly (never silently swallow).
- */
 @Singleton
 class ArticleRepository @Inject constructor(
     private val api: ArticleApi,
     private val cache: ArticleCache
 ) {
-
-    // ---- Article List ----------------------------------------------------------
-
     suspend fun getArticles(forceRefresh: Boolean = false): Result<List<Article>> {
         // Serve from cache unless explicitly forced or stale
         if (!forceRefresh) {
@@ -53,25 +36,22 @@ class ArticleRepository @Inject constructor(
                     )
                 }
 
-                // Happy path
                 response.body()?.articles != null -> {
                     val articles = response.body()!!.articles!!.map { it.toDomain() }
                     cache.putArticleList(articles)
                     Result.success(articles)
                 }
 
-                // Malformed — body exists but both fields are null
                 else -> Result.failure(
                     ConnectivityException("Malformed response: missing articles and error")
                 )
             }
         } catch (e: IOException) {
-            // No internet, timeout, socket error, etc.
-            // Fall back to stale cache (we already missed the fresh window)
+
             val stale = cache.getArticleList()
-                ?: cache.getArticleListStale()  // raw get without TTL check
+                ?: cache.getArticleListStale()
             if (stale != null) {
-                Result.success(stale) // caller can show "offline" banner separately
+                Result.success(stale)
             } else {
                 Result.failure(ConnectivityException(e.message ?: "Network unreachable"))
             }
@@ -79,8 +59,6 @@ class ArticleRepository @Inject constructor(
             Result.failure(ConnectivityException(e.message ?: "Unexpected error"))
         }
     }
-
-    // ---- Article Detail --------------------------------------------------------
 
     suspend fun getArticleDetail(id: String, forceRefresh: Boolean = false): Result<ArticleDetail> {
         if (!forceRefresh) {
@@ -120,16 +98,6 @@ class ArticleRepository @Inject constructor(
             Result.failure(ConnectivityException(e.message ?: "Unexpected error"))
         }
     }
-
-    // ---- Mapping ---------------------------------------------------------------
-
-    private fun ArticleDto.toDomain() = Article(
-        id = id, title = title, summary = summary, updatedAt = updatedAt, category = category
-    )
-
-    private fun ArticleDetailDto.toDomain() = ArticleDetail(
-        id = id, title = title, content = content, updatedAt = updatedAt, category = category
-    )
 }
 
 // Typed exceptions so callers can distinguish error kinds before building AppError
