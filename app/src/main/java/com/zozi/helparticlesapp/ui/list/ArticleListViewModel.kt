@@ -18,6 +18,7 @@ class ArticleListViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val query = MutableStateFlow("")
+    private val selectedCategory = MutableStateFlow<String?>(null)
     private val loadRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
 
     private val loadedState: Flow<ArticleListUiState> = loadRequests
@@ -45,6 +46,12 @@ class ArticleListViewModel @Inject constructor(
                 else -> state
             }
         }
+        .combine(selectedCategory) { state, category ->
+            when (state) {
+                is ArticleListUiState.Success -> state.copy(selectedCategory = category)
+                else -> state
+            }
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
@@ -57,5 +64,9 @@ class ArticleListViewModel @Inject constructor(
 
     fun onQueryChanged(query: String) {
         this.query.value = query
+    }
+
+    fun onCategoryChanged(category: String?) {
+        selectedCategory.value = category
     }
 }

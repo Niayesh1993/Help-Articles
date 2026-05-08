@@ -14,7 +14,6 @@ class ArticleCache(
     private val detailTtlMillis: Long = DETAIL_TTL_MILLIS
 ) {
 
-    // ---- List cache -----------------------------------------------------------
 
     fun putArticleList(articles: List<Article>) {
         val entry = CacheEntry(data = articles, cachedAtMillis = timeProvider.currentTimeMillis())
@@ -41,7 +40,6 @@ class ArticleCache(
         } catch (e: Exception) { null }
     }
 
-    // ---- Detail cache ---------------------------------------------------------
 
     fun putArticleDetail(detail: ArticleDetail) {
         val entry = CacheEntry(data = detail, cachedAtMillis = timeProvider.currentTimeMillis())
@@ -66,7 +64,6 @@ class ArticleCache(
         } catch (e: Exception) { null }
     }
 
-    // ---- Helpers --------------------------------------------------------------
 
     private fun isStale(cachedAtMillis: Long, ttlMillis: Long): Boolean =
         (timeProvider.currentTimeMillis() - cachedAtMillis) > ttlMillis

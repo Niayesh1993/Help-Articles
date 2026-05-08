@@ -1,0 +1,45 @@
+# Gradle
+.gradle/
+build/
+**/build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# Kotlin / KSP / compiler caches
+.kotlin/
+**/kspCaches/
+
+# Android Studio / IntelliJ local state
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Local machine configuration
+local.properties
+**/local.properties
+
+# Android build outputs
+*.apk
+*.ap_
+*.aab
+*.dex
+*.class
+
+# Signing / secrets
+*.jks
+*.keystore
+keystore.properties
+
+# Logs and crash reports
+*.log
+hs_err_pid*
+replay_pid*
+
+# macOS
+.DS_Store
+
+# IDE/editor temp files
+*.swp
+*.swo
+*~
+

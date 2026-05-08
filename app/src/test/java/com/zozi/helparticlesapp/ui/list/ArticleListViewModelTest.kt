@@ -137,6 +137,32 @@ class ArticleListViewModelTest {
         }
     }
 
+    @Test
+    fun `onCategoryChanged updates selected category and filters current article list`() = runTest(mainDispatcherRule.testDispatcher) {
+        val articles = listOf(
+            article(id = "1", title = "Kotlin Basics", category = "Programming"),
+            article(id = "2", title = "Billing Help", category = "Payments"),
+            article(id = "3", title = "Invoices", category = "Payments")
+        )
+        coEvery { repository.getArticles(forceRefresh = false) } returns Result.success(articles)
+
+        val viewModel = ArticleListViewModel(repository)
+
+        viewModel.uiState.test {
+            assertEquals(ArticleListUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            assertEquals(ArticleListUiState.Success(articles = articles), awaitItem())
+
+            viewModel.onCategoryChanged("Payments")
+            advanceUntilIdle()
+
+            val categoryState = expectMostRecentItem() as ArticleListUiState.Success
+            assertEquals("Payments", categoryState.selectedCategory)
+            assertEquals(listOf("2", "3"), categoryState.filtered.map { it.id })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     private fun article(
         id: String,
         title: String,

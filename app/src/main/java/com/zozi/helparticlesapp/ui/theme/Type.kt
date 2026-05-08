@@ -6,65 +6,81 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 
-// Using Google Fonts via downloadable fonts resource (res/font/)
-// Add these to res/font/: dm_sans_regular.xml, dm_sans_medium.xml, dm_sans_bold.xml
-// For simplicity, we reference them as system fonts here and note the swap
-
-val DmSans = FontFamily.Default  // Replace with FontFamily(Font(R.font.dm_sans_*)) after adding fonts
+// Modern Editorial typography.
+// DESIGN.md specifies Playfair Display for headlines and Inter for body/UI.
+// The project does not currently include those font resources, so these use
+// platform Serif/SansSerif fallbacks while preserving the intended hierarchy.
+val EditorialSerif = FontFamily.Serif
+val EditorialSans = FontFamily.SansSerif
 
 val AppTypography = Typography(
     displayLarge = TextStyle(
-        fontFamily = DmSans,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.Bold,
-        fontSize = 57.sp,
-        lineHeight = 64.sp
+        fontSize = 42.sp,
+        lineHeight = 46.sp,
+        letterSpacing = (-0.84).sp
     ),
     headlineLarge = TextStyle(
-        fontFamily = DmSans,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.Bold,
         fontSize = 32.sp,
-        lineHeight = 40.sp
+        lineHeight = 38.sp
     ),
     headlineMedium = TextStyle(
-        fontFamily = DmSans,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 28.sp,
-        lineHeight = 36.sp
+        fontSize = 24.sp,
+        lineHeight = 31.sp
+    ),
+    headlineSmall = TextStyle(
+        fontFamily = EditorialSerif,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 24.sp,
+        lineHeight = 31.sp
     ),
     titleLarge = TextStyle(
-        fontFamily = DmSans,
+        fontFamily = EditorialSerif,
         fontWeight = FontWeight.SemiBold,
-        fontSize = 22.sp,
-        lineHeight = 28.sp
+        fontSize = 24.sp,
+        lineHeight = 31.sp
     ),
     titleMedium = TextStyle(
-        fontFamily = DmSans,
-        fontWeight = FontWeight.Medium,
-        fontSize = 16.sp,
-        lineHeight = 24.sp
+        fontFamily = EditorialSerif,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 20.sp,
+        lineHeight = 26.sp
     ),
     bodyLarge = TextStyle(
-        fontFamily = DmSans,
+        fontFamily = EditorialSans,
+        fontWeight = FontWeight.Normal,
+        fontSize = 18.sp,
+        lineHeight = 29.sp
+    ),
+    bodyMedium = TextStyle(
+        fontFamily = EditorialSans,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp
     ),
-    bodyMedium = TextStyle(
-        fontFamily = DmSans,
+    bodySmall = TextStyle(
+        fontFamily = EditorialSans,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
-        lineHeight = 20.sp
+        lineHeight = 21.sp
     ),
     labelLarge = TextStyle(
-        fontFamily = DmSans,
-        fontWeight = FontWeight.Medium,
+        fontFamily = EditorialSans,
+        fontWeight = FontWeight.SemiBold,
         fontSize = 14.sp,
-        lineHeight = 20.sp
+        lineHeight = 17.sp,
+        letterSpacing = 0.7.sp
     ),
     labelSmall = TextStyle(
-        fontFamily = DmSans,
-        fontWeight = FontWeight.Medium,
-        fontSize = 11.sp,
-        lineHeight = 16.sp
+        fontFamily = EditorialSans,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 12.sp,
+        lineHeight = 14.sp,
+        letterSpacing = 0.6.sp
     )
 )

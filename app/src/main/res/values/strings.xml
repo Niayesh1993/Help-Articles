@@ -22,17 +22,45 @@
     <string name="article_card_content_description">Article: %1$s. Category: %2$s. Updated %3$s</string>
 
     <!-- Article List Screen Strings -->
-    <string name="article_list_title">Help Articles</string>
+    <string name="article_list_title">Articles</string>
     <string name="article_list_refresh_content_desc">Refresh articles</string>
+    <string name="article_list_search_content_desc">Search articles</string>
+    <string name="article_list_close_search_content_desc">Close search</string>
+    <string name="article_list_all_categories">All</string>
+    <string name="article_list_featured_label">Featured</string>
     <string name="article_list_offline_banner">Showing cached content — you appear to be offline</string>
     <string name="article_list_no_match">No articles match "%1$s"</string>
-    <string name="article_list_search_placeholder">Search articles...</string>
+    <string name="article_list_no_results">No articles found</string>
+    <string name="article_list_search_placeholder">Search articles…</string>
+    <string name="article_search_full_placeholder">Search articles, authors, topics…</string>
+    <string name="article_search_clear">CLEAR</string>
+    <string name="article_search_recent_title">Recent Searches</string>
+    <string name="article_search_recent_minimalist_architecture">Minimalist Architecture</string>
+    <string name="article_search_recent_digital_typography">Future of Digital Typography</string>
+    <string name="article_search_recent_quiet_luxury">Quiet Luxury Trends</string>
+    <string name="article_search_trending_title">Trending Topics</string>
+    <string name="article_search_trending_editorial_design">#EditorialDesign</string>
+    <string name="article_search_trending_slow_living">#SlowLiving</string>
+    <string name="article_search_trending_sustainable_tech">#SustainableTech</string>
+    <string name="article_search_trending_modernism">#Modernism</string>
+    <string name="article_search_apply_filters">Apply Filters (%1$d Results)</string>
+    <string name="article_list_active_search">Search: %1$s</string>
+    <plurals name="article_search_result_count">
+        <item quantity="one">%1$d result</item>
+        <item quantity="other">%1$d results</item>
+    </plurals>
     <string name="article_list_loading_content_desc">Loading articles</string>
     <string name="article_list_empty">No articles available</string>
 
     <!-- Article Detail Screen Strings -->
     <string name="article_detail_navigate_back">Navigate back</string>
     <string name="article_detail_loading_content_desc">Loading article</string>
+    <string name="article_detail_hero_content_desc">Article hero artwork</string>
+    <string name="article_detail_author_name">Editorial Team</string>
+    <string name="article_detail_metadata">Updated %1$s • 5 min read</string>
+    <string name="article_detail_share_content_desc">Share article</string>
+    <string name="article_detail_bookmark_content_desc">Bookmark article</string>
+    <string name="article_detail_tag_help_article">Help Article</string>
     <string name="article_updated_prefix">Updated %1$s</string>
     <string name="article_detail_updated_prefix">@string/article_updated_prefix</string>
 </resources>
