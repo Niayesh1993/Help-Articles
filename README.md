@@ -32,8 +32,7 @@ and Compose screens never touch raw exceptions.
 
 ## Auto-refresh & Background Prefetch
 
-**Auto-refresh**: On every `loadArticles()` call (triggered by `init`,
-`onRetry`, or the pull-to-refresh / refresh icon), the repository checks
+**Auto-refresh**: On every `loadArticles()`, the repository checks
 cache freshness first. If stale or absent, it fetches. On connectivity
 failure, it falls back to stale cache (if any), so the screen always shows
 *something* when possible.
@@ -76,7 +75,6 @@ is used for fast, deterministic behaviour.
 - Connectivity error UX + backend error UX, fully distinct
 - KMP cache module with TTL/staleness + SharedPreferences Android backend
 - Offline fallback (stale cache served on IOException)
-- Auto-refresh on resume via ViewModel `init`
 - Daily background prefetch with WorkManager
 - Light/dark theme (Material 3, dynamic color on Android 12+)
 - Accessible touch targets, scalable text, semantic content descriptions
