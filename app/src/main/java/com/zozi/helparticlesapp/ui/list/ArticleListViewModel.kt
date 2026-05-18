@@ -3,16 +3,19 @@ package com.zozi.helparticlesapp.ui.list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.zozi.helparticlesapp.data.model.toAppError
 import com.zozi.helparticlesapp.data.repository.ArticleRepository
+import com.zozi.helparticlesapp.ui.common.UiStateSharingStarted
+import com.zozi.helparticlesapp.ui.common.loadStateFlow
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 
 @HiltViewModel
-@OptIn(ExperimentalCoroutinesApi::class)
 class ArticleListViewModel @Inject constructor(
     private val repository: ArticleRepository
 ) : ViewModel() {
@@ -21,23 +24,18 @@ class ArticleListViewModel @Inject constructor(
     private val selectedCategory = MutableStateFlow<String?>(null)
     private val loadRequests = MutableSharedFlow<Boolean>(extraBufferCapacity = 1)
 
-    private val loadedState: Flow<ArticleListUiState> = loadRequests
-        .onStart { emit(false) }
-        .flatMapLatest { forceRefresh ->
-            flow {
-                emit(ArticleListUiState.Loading)
-                val result = repository.getArticles(forceRefresh)
-                emit(
-                    result.fold(
-                        onSuccess = { articles ->
-                            if (articles.isEmpty()) ArticleListUiState.Empty
-                            else ArticleListUiState.Success(articles = articles)
-                        },
-                        onFailure = { error -> ArticleListUiState.Error(error.toAppError()) }
-                    )
-                )
-            }
-        }
+    private val loadedState: StateFlow<ArticleListUiState> = loadStateFlow(
+        loadRequests = loadRequests,
+        scope = viewModelScope,
+        initialState = ArticleListUiState.Loading,
+        loadingState = ArticleListUiState.Loading,
+        load = { forceRefresh -> repository.getArticles(forceRefresh) },
+        onSuccess = { articles ->
+            if (articles.isEmpty()) ArticleListUiState.Empty
+            else ArticleListUiState.Success(articles = articles)
+        },
+        onError = { error -> ArticleListUiState.Error(error) }
+    )
 
     val uiState: StateFlow<ArticleListUiState> = loadedState
         .combine(query) { state, q ->
@@ -54,7 +52,7 @@ class ArticleListViewModel @Inject constructor(
         }
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(stopTimeoutMillis = 5_000),
+            started = UiStateSharingStarted,
             initialValue = ArticleListUiState.Loading
         )
 

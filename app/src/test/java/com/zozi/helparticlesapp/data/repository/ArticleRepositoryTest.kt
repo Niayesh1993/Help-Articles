@@ -14,12 +14,13 @@ import com.zozi.shared.util.TimeProvider
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
+import kotlinx.coroutines.CancellationException
 import java.io.IOException
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 import retrofit2.Response
 
@@ -129,6 +130,18 @@ class ArticleRepositoryTest {
     }
 
     @Test
+    fun `getArticles rethrows CancellationException`() = kotlinx.coroutines.test.runTest {
+        coEvery { api.getArticles() } throws CancellationException("cancelled")
+
+        try {
+            repository.getArticles()
+            fail("Expected CancellationException")
+        } catch (e: CancellationException) {
+            assertEquals("cancelled", e.message)
+        }
+    }
+
+    @Test
     fun `getArticleDetail returns fresh cache and skips api when forceRefresh is false`() = kotlinx.coroutines.test.runTest {
         val cachedDetail = articleDetail(id = ARTICLE_ID, title = "Cached Detail")
         cache.putArticleDetail(cachedDetail)
@@ -219,6 +232,18 @@ class ArticleRepositoryTest {
         assertTrue(result.isFailure)
         assertTrue(exception is ConnectivityException)
         assertEquals("offline", exception?.message)
+    }
+
+    @Test
+    fun `getArticleDetail rethrows CancellationException`() = kotlinx.coroutines.test.runTest {
+        coEvery { api.getArticleDetail(ARTICLE_ID) } throws CancellationException("cancelled")
+
+        try {
+            repository.getArticleDetail(ARTICLE_ID)
+            fail("Expected CancellationException")
+        } catch (e: CancellationException) {
+            assertEquals("cancelled", e.message)
+        }
     }
 
     private fun articleDto(

@@ -7,6 +7,7 @@ import androidx.work.WorkerParameters
 import com.zozi.helparticlesapp.data.repository.ArticleRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.CancellationException
 
 /**
  * Background worker that prefetches the article list once per day.
@@ -29,9 +30,17 @@ class PrefetchWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         return try {
-            repository.getArticles(forceRefresh = true)
-            Result.success()
-        } catch (e: Exception) {
+            repository.getArticles(forceRefresh = true).fold(
+                onSuccess = { Result.success() },
+                onFailure = { error ->
+                    if (error is CancellationException) throw error
+                    if (runAttemptCount < MAX_RETRY_ATTEMPTS) Result.retry()
+                    else Result.failure()
+                }
+            )
+        } catch (e: CancellationException) {
+            throw e
+        } catch (_: Exception) {
             if (runAttemptCount < MAX_RETRY_ATTEMPTS) Result.retry()
             else Result.failure()
         }

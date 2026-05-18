@@ -4,6 +4,7 @@ import com.zozi.helparticlesapp.data.remote.ArticleApi
 import com.zozi.shared.cache.ArticleCache
 import com.zozi.shared.model.Article
 import com.zozi.shared.model.ArticleDetail
+import kotlinx.coroutines.CancellationException
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -55,6 +56,8 @@ class ArticleRepository @Inject constructor(
             } else {
                 Result.failure(ConnectivityException(e.message ?: "Network unreachable"))
             }
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(ConnectivityException(e.message ?: "Unexpected error"))
         }
@@ -94,6 +97,8 @@ class ArticleRepository @Inject constructor(
             val cached = cache.getArticleDetailStale(id)
             if (cached != null) Result.success(cached)
             else Result.failure(ConnectivityException(e.message ?: "Network unreachable"))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             Result.failure(ConnectivityException(e.message ?: "Unexpected error"))
         }

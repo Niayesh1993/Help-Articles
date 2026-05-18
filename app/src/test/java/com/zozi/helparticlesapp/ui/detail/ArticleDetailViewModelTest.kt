@@ -97,6 +97,36 @@ class ArticleDetailViewModelTest {
     }
 
     @Test
+    fun `uiState emits error when repository throws and can recover on retry`() = runTest(mainDispatcherRule.testDispatcher) {
+        val refreshedDetail = articleDetail(id = ARTICLE_ID, title = "Fresh Detail")
+        coEvery { repository.getArticleDetail(id = ARTICLE_ID, forceRefresh = false) } throws IllegalStateException("Unexpected failure")
+        coEvery { repository.getArticleDetail(id = ARTICLE_ID, forceRefresh = true) } returns Result.success(refreshedDetail)
+
+        val viewModel = createViewModel()
+
+        viewModel.uiState.test {
+            assertEquals(ArticleDetailUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val errorState = awaitItem()
+
+            assertTrue(errorState is ArticleDetailUiState.Error)
+            assertEquals(
+                AppError.ConnectivityError(message = "Unexpected failure"),
+                (errorState as ArticleDetailUiState.Error).appError
+            )
+
+            viewModel.loadDetail(forceRefresh = true)
+            advanceUntilIdle()
+
+            assertEquals(ArticleDetailUiState.Success(refreshedDetail), expectMostRecentItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        coVerify(exactly = 1) { repository.getArticleDetail(id = ARTICLE_ID, forceRefresh = false) }
+        coVerify(exactly = 1) { repository.getArticleDetail(id = ARTICLE_ID, forceRefresh = true) }
+    }
+
+    @Test
     fun `loadDetail with forceRefresh reloads using forced repository call`() = runTest(mainDispatcherRule.testDispatcher) {
         val cachedDetail = articleDetail(id = ARTICLE_ID, title = "Cached Detail")
         val refreshedDetail = articleDetail(id = ARTICLE_ID, title = "Fresh Detail")

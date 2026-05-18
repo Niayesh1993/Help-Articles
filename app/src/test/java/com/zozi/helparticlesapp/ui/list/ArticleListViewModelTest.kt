@@ -87,6 +87,36 @@ class ArticleListViewModelTest {
     }
 
     @Test
+    fun `uiState emits error when repository throws and can recover on retry`() = runTest(mainDispatcherRule.testDispatcher) {
+        val refreshedArticles = listOf(article(id = "2", title = "Fresh Article"))
+        coEvery { repository.getArticles(forceRefresh = false) } throws IllegalStateException("Unexpected failure")
+        coEvery { repository.getArticles(forceRefresh = true) } returns Result.success(refreshedArticles)
+
+        val viewModel = ArticleListViewModel(repository)
+
+        viewModel.uiState.test {
+            assertEquals(ArticleListUiState.Loading, awaitItem())
+            advanceUntilIdle()
+            val errorState = awaitItem()
+
+            assertTrue(errorState is ArticleListUiState.Error)
+            assertEquals(
+                AppError.ConnectivityError(message = "Unexpected failure"),
+                (errorState as ArticleListUiState.Error).appError
+            )
+
+            viewModel.loadArticles(forceRefresh = true)
+            advanceUntilIdle()
+
+            assertEquals(ArticleListUiState.Success(articles = refreshedArticles), expectMostRecentItem())
+            cancelAndIgnoreRemainingEvents()
+        }
+
+        coVerify(exactly = 1) { repository.getArticles(forceRefresh = false) }
+        coVerify(exactly = 1) { repository.getArticles(forceRefresh = true) }
+    }
+
+    @Test
     fun `loadArticles with forceRefresh reloads using forced repository call`() = runTest(mainDispatcherRule.testDispatcher) {
         val cachedArticles = listOf(article(id = "1", title = "Cached Article"))
         val refreshedArticles = listOf(article(id = "2", title = "Fresh Article"))
